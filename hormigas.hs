@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
@@ -18,11 +17,18 @@ camino (G xs (y:z:ys))
   |otherwise = camino (G xs ys)
 --G [1,2,3,4] [(A (1,2) 2), (A (1,3) 3), (A (2,4) 3), (A (3,4) 4)] ejemplo de grafo
 --G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (3,4) 61),(A (3,5) 44),(A (4,5) 93)]
+estaArista :: Grafo -> Arista -> Bool
 
 caminosNodoA :: Grafo -> [[Arista]]
 caminosNodoA (G xs []) = []
 caminosNodoA (G xs ys) = quitarRepes (camino (G xs ys)) : caminosNodoA (G xs arista)
   where arista = eliminarLista (G xs ys) (head (tail (quitarRepes(camino (G xs ys)))))
+
+caminosNN :: Grafo -> Nodo -> Nodo -> [[Aristas]]
+caminosNN (G (x:xs) ys) n1 n2
+    | estaArista (G (x:xs) ys) (n1,n2) = (n1,n2) -- 
+    | estaArista (G (x:xs) ys) (n1,x) =( [(n1,x)] ++ caminosNN (G xs ys) x n2) --
+    |otherwise = caminos NN (G xs ys) 
 
 eliminarLista :: Grafo -> Arista -> [Arista]
 eliminarLista (G xs []) arista = []
@@ -133,5 +139,3 @@ noCaminosRepes (x:xs) = x : noCaminosRepes (filter (/= x) xs)
 
 -- (caminosPosibles (G [1,2,3,4,5] [(A (1,2) 4), (A (1,3) 3), (A (2,4) 3), (A (3,4) 4)])) (A (1,2) 4)
 --G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (3,4) 61),(A (3,5) 44),(A (4,5) 93)]
-
-                 
