@@ -10,14 +10,27 @@ instance Eq Arista where
 camino :: Grafo -> [Arista] --está función crea un camino desde el punto inicial al final, pero aparecen repeticiones de aristas
 camino (G _ []) = []
 camino (G _ [x]) = [x]
-camino (G [x] _ ) = []
-camino (G (x:xs) (y:z:ys))
-  |last xs /= dos y && dos y == uno z = y:z:camino (G xs (z:ys))
+camino (G xs (y:z:ys))
+  |last xs /= dos y && dos y == uno z = y:z:camino (G xs (z:ys)) -- :( y : camino (G (dropWhile xs == dos y) aristasnodo x))
   |last xs /= dos y && dos y /= uno z = y:camino (G xs (y:ys))
   |last xs == dos y && dos y == uno z = y:z:camino (G xs [])
   |last xs == dos y && dos y /= uno z = y:camino (G xs [])
-  |otherwise = camino (G (x:xs) ys)
+  |otherwise = camino (G xs ys)
 --G [1,2,3,4] [(A (1,2) 2), (A (1,3) 3), (A (2,4) 3), (A (3,4) 4)] ejemplo de grafo
+--G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (3,4) 61),(A (3,5) 44),(A (4,5) 93)]
+
+caminosNodoA :: Grafo -> [[Arista]]
+caminosNodoA (G xs []) = []
+caminosNodoA (G xs ys) = quitarRepes (camino (G xs ys)) : caminosNodoA (G xs arista)
+  where arista = eliminarLista (G xs ys) (head (tail (quitarRepes(camino (G xs ys)))))
+
+eliminarLista :: Grafo -> Arista -> [Arista]
+eliminarLista (G xs []) arista = []
+eliminarLista (G xs (y:ys)) arista 
+  |arista /= y = y: eliminarLista (G xs ys) arista 
+  |otherwise = eliminarLista (G xs ys) arista 
+
+--aristasNodoA grafo nodo -> [arsita]
 
 quitarRepes :: [Arista] -> [Arista] --quita todas las aristas repetidas de un caminu
 quitarRepes [] = []
@@ -42,6 +55,8 @@ caminosPosibles (G xs (y:ys))
   |esCamino (G xs (y:ys)) cam = cam : caminosPosibles (G xs ys)
   |otherwise = caminosPosibles (G xs ys)
   where cam = quitarRepes (camino (G xs (y:ys)))
+--G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (3,4) 61),(A (3,5) 44),(A (4,5) 93)]
+
 
 distanciaCamino :: [Arista] -> Float
 distanciaCamino = foldr ((+) . distancia) 0
@@ -96,7 +111,7 @@ elegirCamino (G xs []) m = []
 elegirCamino (G xs (y:ys)) m
   |probabilidadArista (G xs (y:ys)) y m == maximum (probabilidadesCamino (G xs (y:ys)) (aristasNodoa (G xs (y:ys)) (uno y)) m) = noCaminosRepes (añadir (caminosPosibles (G xs (y:ys))) y ++ elegirCamino (G xs aristas) m)
   |otherwise = noCaminosRepes (eliminar (caminosPosibles (G xs (y:ys))) y ++ elegirCamino (G xs aristas) m) --crep que eliminar es innecesario, aunque a lo me lo acorta ya que quita elementos de la lista de caminos posibles
-  where aristas = quitarRepes (concat (caminosConA (caminosPosibles (G xs (y:ys))) y))
+  where aristas = quitarRepes (concat (caminosConA (caminosPosibles (G xs ys)) y))
 
 añadir :: [[Arista]] -> Arista -> [[Arista]]
 añadir [] _ = []
@@ -117,4 +132,6 @@ noCaminosRepes (x:xs) = x : noCaminosRepes (filter (/= x) xs)
 
 
 -- (caminosPosibles (G [1,2,3,4,5] [(A (1,2) 4), (A (1,3) 3), (A (2,4) 3), (A (3,4) 4)])) (A (1,2) 4)
---G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (4,5) 93)]
+--G [1,2,3,4,5] [(A (1,2) 12),(A (1,3) 34),(A (1,5) 78),(A (2,4) 55),(A (2,5) 32),(A (3,4) 61),(A (3,5) 44),(A (4,5) 93)]
+
+                 
