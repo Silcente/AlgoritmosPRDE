@@ -20,6 +20,9 @@ posicion (P xs ys h g) = xs
 velocidad :: Particula -> (Float,Float)
 velocidad (P xs ys h g) = ys
 
+global :: Particula -> (Float, Float)
+global (P xs ys h g) = g
+
 --Las tres siguientes funciones sirven para inciar con un a malla uniforme de particulas.
 distribuir :: Int -> Float -> Float -> [Float]
 distribuir 0 _ _ = []
@@ -68,6 +71,22 @@ kpasos 0 xs f _ _ _ = ponerG xs f
 kpasos k xs f w phih phig= kpasos (k-1) (map (iteracion f w phih phig (aleatorios!!(k-1)) (aleatorios !! (2*k-1))) (ponerG xs f)) f w phih phig
     where aleatorios = numerosAleatorios (2*k) 
 
+roundPar :: Particula -> Particula
+roundPar (P pos v h g) = P roundpos roundv roundh roundg 
+    where roundpos = (fromIntegral(round((fst pos)*1000))/1000, fromIntegral(round((snd pos)*1000))/1000)  
+          roundv = (fromIntegral(round((fst v)*1000))/1000, fromIntegral(round((snd v)*1000))/1000)  
+          roundh = (fromIntegral(round((fst h)*1000))/1000, fromIntegral(round((snd h)*1000))/1000)  
+          roundg = (fromIntegral(round((fst g)*1000))/1000, fromIntegral(round((snd g)*1000))/1000)   
+
+particulasString :: [Particula] -> String
+particulasString [] = ""
+particulasString (x:xs) = show x ++ "\n" ++ (particulasString xs)
+
+informe :: [Particula]-> ((Float,Float)->Float) -> String
+informe xs f = resumen1 ++"\n"++resumen2++ "\n" ++ particulasString (map roundPar xs) 
+    where mejorpos = global ((map roundPar xs)!!0)
+          resumen1 = "La mejor posición es " ++ show mejorpos ++ " y el valor de la función en este punto es " ++ show (f mejorpos)
+          resumen2 = "Las particulas en la última iteración quedan de la siguiente manera: "
 --La función de optimizar
 optimizar :: ((Float,Float) -> Float) -> Int -> Int ->[Float]-> [Float] -> Float -> Float -> Float -> (Float,Float)
 optimizar f k n ls us w phih phig = g
@@ -77,28 +96,28 @@ func :: (Float,Float) -> Float
 func (x,y) = abs(x*(y-5) + x*sin(y-7)) 
 
 proceso :: IO ()
-proceso = do putStr "Escriba el nombre del fichero de salida"
+proceso = do putStr "Escriba el nombre del fichero de salida: "
              nombreOut <- getLine 
-             putStr "Escriba el numero de pasos que quiere realizar"
+             putStr "Escriba el numero de pasos que quiere realizar: "
              pasos <- getLine
              let steps = read pasos :: Int 
-             putStr "Escriba el indice de particulas, si introduce el número n se distribuirán n^2 particulas"
+             putStr "Escriba el indice de particulas, si introduce el número n se distribuirán n^2 particulas: "
              part <- getLine 
              let n = read part :: Int 
-             putStr "Escriba en una lista los limites inferiores de busqueda"
+             putStr "Escriba en una lista los limites inferiores de busqueda: "
              liminf <- getLine
              let ls = read liminf :: [Float]
-             putStr "Escriba en una lista los limites superiores de busqueda"
+             putStr "Escriba en una lista los limites superiores de busqueda: "
              limsup <- getLine
              let us = read limsup :: [Float]
-             putStr "Escriba el parametro w"
+             putStr "Escriba el parametro w: "
              wchar <- getLine 
              let w = read wchar :: Float
-             putStr "Escriba el parametro phih"
+             putStr "Escriba el parametro phih: "
              phihchar <- getLine 
              let phih = read phihchar :: Float
-             putStr "Escriba el parametro phig"
+             putStr "Escriba el parametro phig: "
              phigchar <- getLine 
              let phig = read phigchar :: Float
-             texto <- lines (map show (kpasos steps (ponerG (inicioPar (inicializar n ls us)) f) f w phih phig))
+             let texto = informe (kpasos steps (ponerG (inicioPar (inicializar n ls us)) func) func w phih phig) func
              writeFile nombreOut texto 
