@@ -1,7 +1,7 @@
 # AlgoritmosPRDE
 PRDE
 
-De momento estamos implmentando los suiguientes algoritmos:
+De momento estamos implmentando los siguientes algoritmos:
 
 PSO: Particules Swarm Optimitation
 
