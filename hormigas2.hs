@@ -1,5 +1,3 @@
-import System.Random
-
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
 data Grafo = G [Nodo] [Arista] deriving (Show, Read)
@@ -109,38 +107,41 @@ listasProbabilidadM :: Grafo -> [Arista] -> Int -> Int -> [Float] --lista de por
 listasProbabilidadM _ [] _ _ = []
 listasProbabilidadM grafo (x:xs) n m = (probabilidadAristaParte1M grafo x n m) : listasProbabilidadM grafo xs n m
 
-probabilidadAristaM :: Grafo -> Arista -> Int -> Int -> Float --probabilidad de la arista
-probabilidadAristaM grafo arista n m = probabilidadAristaParte1M grafo arista n m / sum (listasProbabilidadM grafo (aristasNodoa grafo (uno arista)) n m)
+probabilidadAristaM :: Grafo -> Arista -> Int -> Int -> (Float, Arista) --probabilidad de la arista
+probabilidadAristaM grafo arista n m = ((probabilidadAristaParte1M grafo arista n m / sumas), arista)
+  where sumas = sum (listasProbabilidadM grafo (aristasNodoa grafo (uno arista)) n m)
 
-probabilidadesM :: Grafo -> [Arista] -> Int -> Int -> [Float] --lista de porbablidades de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
+probabilidadesM :: Grafo -> [Arista] -> Int -> Int -> [(Float, Arista)] --lista de porbablidades de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
 probabilidadesM _ [] _ _ = []
 probabilidadesM grafo (x:xs) n m = (probabilidadAristaM grafo x n m) : probabilidadesM grafo xs n m
 
 
-aristaM :: Grafo -> Float -> Int -> Int -> Arista
-aristaM (G xs (y:ys)) z n m
-  |z==probabilidadAristaM (G xs (y:ys)) y n m = y
-  |otherwise = aristaM (G xs ys) z n m
-
-
-elegirArista1M :: Grafo -> [Float] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
+intervaloProb :: [(Float, Arista)] -> [(Float, Arista)]
+intervaloProb (x:y:ys) = (fst x, snd x) : intervaloProb (((primero+segundo), snd y):ys)
+  where primero = fst x
+        segundo = fst y
+  
+elegirArista1M :: Grafo -> [(Float, Arista)] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
 elegirArista1M grafo (x:xs) n m p
-  | p < x =  aristaM grafo x n m 
+  | p < (fst x) =  snd x
   |otherwise = elegirArista1M grafo xs n m p
   
-
 
 elegirCamino1M :: Grafo -> Nodo -> Nodo -> Int -> Int -> Float -> [Arista]
 elegirCamino1M grafo x y n m p
   |x/=y = arista : elegirCamino1M grafo (dos arista) y n m p
   |otherwise = []
-  where arista = elegirArista1M grafo (ordena (probabilidadesM grafo (aristasNodoa grafo m) n m)) n m p
+  where arista = elegirArista1M grafo (intervaloProb (probabilidadesM grafo (aristasNodoa grafo m) n m)) n m p
 
 
 elegirCaminoNM :: Grafo -> Nodo -> Nodo -> Int -> Int -> [[Arista]] -- m es el número de hormigas
 elegirCaminoNM grafo x y n 0 = []
 elegirCaminoNM grafo x y n m = elegirCamino1M grafo x y n m p : elegirCaminoNM grafo x y n (m-1) 
   where p = last( numerosAleatorios (n+m))
+
+numerosAleatorios :: Int -> [Float]
+numerosAleatorios n = take n (randomRs (0.0,1.0) gen)
+    where gen= mkStdGen 2022
 
 noRepes :: Eq a => [a] -> [a]
 noRepes [] = []
