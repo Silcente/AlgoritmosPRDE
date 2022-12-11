@@ -1,3 +1,4 @@
+import System.Random
 
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
@@ -122,22 +123,24 @@ aristaM (G xs (y:ys)) z n m
   |otherwise = aristaM (G xs ys) z n m
 
 
-elegirArista1M :: Grafo -> [Float] -> Int -> Int -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
-elegirArista1M grafo (x:xs) n m
-  | p < x =  aristaM grafo x n m
-  |otherwise = elegirArista1M grafo xs n m
-  where p = 0.5
+elegirArista1M :: Grafo -> [Float] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
+elegirArista1M grafo (x:xs) n m p
+  | p < x =  aristaM grafo x n m 
+  |otherwise = elegirArista1M grafo xs n m p
+  
 
-elegirCamino1M :: Grafo -> Nodo -> Nodo -> Int -> Int -> [Arista]
-elegirCamino1M grafo x y n m
-  |x/=y = arista : elegirCamino1M grafo (dos arista) y n m
+
+elegirCamino1M :: Grafo -> Nodo -> Nodo -> Int -> Int -> Float -> [Arista]
+elegirCamino1M grafo x y n m p
+  |x/=y = arista : elegirCamino1M grafo (dos arista) y n m p
   |otherwise = []
-  where arista = elegirArista1M grafo (ordena (probabilidadesM grafo (aristasNodoa grafo m) n m)) n m
+  where arista = elegirArista1M grafo (ordena (probabilidadesM grafo (aristasNodoa grafo m) n m)) n m p
 
 
 elegirCaminoNM :: Grafo -> Nodo -> Nodo -> Int -> Int -> [[Arista]] -- m es el número de hormigas
 elegirCaminoNM grafo x y n 0 = []
-elegirCaminoNM grafo x y n m = elegirCamino1M grafo x y n m : elegirCaminoNM grafo x y n (m-1)
+elegirCaminoNM grafo x y n m = elegirCamino1M grafo x y n m p : elegirCaminoNM grafo x y n (m-1) 
+  where p = last( numerosAleatorios (n+m))
 
 noRepes :: Eq a => [a] -> [a]
 noRepes [] = []
