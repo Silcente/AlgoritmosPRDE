@@ -39,55 +39,18 @@ delete m (x:xs)
     | x == m = delete m xs 
     | otherwise = x : (delete m xs)
 
---ITERACIÓN 1
-
-probabilidadAristaParte1 :: Grafo -> Arista -> Float --la necesito para calcular la probabilidad de una arista
-probabilidadAristaParte1 grafo arista  = inverso (distancia arista) * 0.1 --0.1 son las ferormonas en una arista cuando no la ha recorrido ninguna hormiga inicialmente
-
-listasProbabilidad :: Grafo -> [Arista] -> [Float] --lista de porbablidadesparte1 de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
-listasProbabilidad grafo = map (probabilidadAristaParte1 grafo)
-
-probabilidadArista :: Grafo -> Arista ->  Float --probabilidad de la arista
-probabilidadArista grafo arista  = probabilidadAristaParte1 grafo arista / sum (listasProbabilidad grafo (aristasNodoa grafo (uno arista)))
-
-probabilidades :: Grafo -> [Arista] -> [Float] --lista de porbablidades de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
-probabilidades grafo = map (probabilidadArista grafo)
-
 aristasNodoa :: Grafo -> Nodo -> [Arista] --me devuelve todas las posibles aristas desde el nodo x
 aristasNodoa (G xs []) _ = []
 aristasNodoa (G xs (y:ys)) x
   |x == uno y = y : aristasNodoa (G xs ys) x
   |otherwise = aristasNodoa (G xs ys) x
 
-arista :: Grafo -> Float -> Arista
-arista (G xs (y:ys)) m
-  |m==probabilidadArista (G xs (y:ys)) y = y
-  |otherwise = arista (G xs ys) m
 
 ordena :: Ord a => [a] -> [a]
 ordena [] = []
 ordena xs = m : ordena (delete m xs)
     where m = minimum xs
 
-elegirArista1 :: Grafo -> [Float] -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
-elegirArista1 grafo (x:xs)
-  | p < x =  arista grafo x
-  |otherwise = elegirArista1 grafo xs
-  where p = 0.5
-
-elegirCamino1 :: Grafo -> Nodo -> Nodo -> [Arista]
-elegirCamino1 grafo m n
-  |m/=n = arista : elegirCamino1 grafo (dos arista) n
-  |otherwise = []
-  where arista = elegirArista1 grafo (ordena (probabilidades grafo (aristasNodoa grafo m)))
-
-
-elegirCaminoN :: Grafo -> Nodo -> Nodo -> Int -> [[Arista]] -- m es el número de hormigas
-elegirCaminoN grafo x y 0 = []
-elegirCaminoN grafo x y m = elegirCamino1 grafo x y : elegirCaminoN grafo x y (m-1)
-
-
---ITERACION N
 
 caminosConA :: [[Arista]] -> Arista -> [[Arista]]
 caminosConA [] _ = []
@@ -126,7 +89,7 @@ intervaloProb (x:y:ys) = (fst x, snd x) : intervaloProb (((primero+segundo), snd
         segundo = fst y
   
 elegirArista1M :: Grafo -> [(Float, Arista)] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
-elegirArista1M _ [x] _ _ = snd x
+elegirArista1M _ [x] _ _ _ = snd x
 elegirArista1M grafo (x:xs) n m p
   | p < (fst x) =  snd x
   |otherwise = elegirArista1M grafo xs n m p
