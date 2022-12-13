@@ -203,36 +203,36 @@ número de iteraciones... Para acabar ejecutando el algoritmo PSO.
 
 -}
 
-proceso :: IO ()
-proceso = do putStr "Elija la función que quiere optimizar indicando el número correspondiente: \n"
-             putStr "[1] f(x,y,z) = |x*(y-5) + x*sin(y-7)+z| \n"
-             putStr "[2] f(x,y,z) = x^2*y^3+z^6 \n"
-             putStr "[3] f(x,y,z) = - ((sin(x+y))^2+(cos(x+z))^2) \n"
-             putStr "[4] f(x,y,z) = x^2 + y^2 + z^2 \n"
-             putStr "[5] f(x,y,z) = |x+y+z| + |x*y*z| \n"
-             putStr "[6] f(x,y,z) = x^2 + (x+y)^2 + (x+y+z)^2 \n"
-             funchar <- getLine
-             putStr "Escriba el nombre del fichero que contiene los parámetros: "
-             nombreIn <- getLine
-             contenido <- readFile nombreIn
-             putStr "Escriba el nombre del fichero de salida: "
-             nombreOut <- getLine 
-             putStr "Escriba el numero de pasos que quiere realizar: "
-             pasos <- getLine
-             putStr "Escriba el indice de particulas, si introduce el número n se distribuirán n^3 particulas: "
-             part <- getLine 
-             let func = elegirF (read funchar :: Int)
-                 lineas = lines contenido
-                 wchar = (words (lineas !! 0) ) !! 1  
-                 phihchar = (words (lineas !! 1) ) !! 1  
-                 phigchar = (words (lineas !! 2) ) !! 1  
-                 steps = read pasos :: Int 
-                 n = read part :: Int
-                 ls = read ((words (lineas !! 3) ) !! 1) :: [Float]
-                 us =  read ((words (lineas !! 4) ) !! 1) :: [Float]
-                 w = read wchar :: Float
-                 phih = read phihchar :: Float
-                 phig = read phigchar :: Float
-                 texto = informe (kpasos steps (ponerG (inicioPar (inicializar n ls us)) func) func w phih phig) func
-             writeFile nombreOut texto 
+main :: IO ()
+main = do putStr "Elija la función que quiere optimizar indicando el número correspondiente: \n"
+          putStr "[1] f(x,y,z) = |x*(y-5) + x*sin(y-7)+z| \n"
+          putStr "[2] f(x,y,z) = x^2*y^3+z^6 \n"
+          putStr "[3] f(x,y,z) = - ((sin(x+y))^2+(cos(x+z))^2) \n"
+          putStr "[4] f(x,y,z) = x^2 + y^2 + z^2 \n"
+          putStr "[5] f(x,y,z) = |x+y+z| + |x*y*z| \n"
+          putStr "[6] f(x,y,z) = x^2 + (x+y)^2 + (x+y+z)^2 \n"
+          funchar <- getLine
+          putStr "Escriba el nombre del fichero que contiene los parámetros: "
+          nombreIn <- getLine
+          contenido <- readFile nombreIn
+          putStr "Escriba el nombre del fichero de salida: "
+          nombreOut <- getLine 
+          putStr "Escriba el numero de pasos que quiere realizar: "
+          pasos <- getLine
+          putStr "Escriba el indice de particulas, si introduce el número n se distribuirán n^3 particulas: "
+          part <- getLine 
+          let func = elegirF (read funchar :: Int)
+              lineas = lines contenido
+              wchar = (words (lineas !! 0) ) !! 1  
+              phihchar = (words (lineas !! 1) ) !! 1  
+              phigchar = (words (lineas !! 2) ) !! 1  
+              steps = read pasos :: Int 
+              n = read part :: Int
+              ls = read ((words (lineas !! 3) ) !! 1) :: [Float]
+              us =  read ((words (lineas !! 4) ) !! 1) :: [Float]
+              w = read wchar :: Float
+              phih = read phihchar :: Float
+              phig = read phigchar :: Float
+              texto = informe (kpasos steps (ponerG (inicioPar (inicializar n ls us)) func) func w phih phig) func
+          writeFile nombreOut texto 
 
