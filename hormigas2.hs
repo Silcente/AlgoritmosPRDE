@@ -1,3 +1,5 @@
+import System.Random
+
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
 data Grafo = G [Nodo] [Arista] deriving (Show, Read)
@@ -148,14 +150,14 @@ noRepes [] = []
 noRepes (x:xs) = x : noRepes (filter (/= x) xs)
 
 fin :: IO ()
-fin = do putStr "Elige el número de hormigas iniciales"
+fin = do putStr "Elige el número de hormigas iniciales "
          hormichar <- getLine
-         putStr "Elige el número de iteraciones"
+         putStr "Elige el número de iteraciones "
          itechar <- getLine
-         putStr "Escribe el nombre del fichero de entrada"
+         putStr "Escribe el nombre del fichero de entrada "
          nombreIn <- getLine
          contenido <- readFile (nombreIn)
-         putStr "Escribe el nombre del fichero de salida"
+         putStr "Escribe el nombre del fichero de salida "
          nombreOut <- getLine
          let listanodos = ordena (noRepes (nodos (lines contenido)))
              hormigas = read hormichar :: Int
@@ -175,7 +177,7 @@ aristasFichero (x:xs) = ( A (nodo1,nodo2) dist) : aristasFichero xs
 
 nodos :: [String] -> [Int]
 nodos [] = []
-nodso (x:xs) = nodo1 : nodo2 : nodos xs
+nodos (x:xs) = nodo1 : nodo2 : nodos xs
   where nodo1 = read (head (words x)) :: Int
         nodo2 = read (head (tail (words x))) :: Int
 
@@ -186,4 +188,4 @@ grafoFichero (x:xs) = show x ++ "\n" ++ grafoFichero xs
 caminosFichero :: [[Arista]] -> String
 caminosFichero [] = ""
 caminosFichero (x:xs) = intro ++ "\n" ++ grafoFichero x ++ "\n" ++ caminosFichero xs
-  where intro = "Un camino elegido por las hormigas es:"
+  where intro = "Un camino elegido por las hormigas es: "
