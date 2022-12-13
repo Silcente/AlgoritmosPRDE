@@ -126,6 +126,7 @@ intervaloProb (x:y:ys) = (fst x, snd x) : intervaloProb (((primero+segundo), snd
         segundo = fst y
   
 elegirArista1M :: Grafo -> [(Float, Arista)] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
+elegirArista1M _ [x] _ _ = snd x
 elegirArista1M grafo (x:xs) n m p
   | p < (fst x) =  snd x
   |otherwise = elegirArista1M grafo xs n m p
