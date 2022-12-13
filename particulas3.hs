@@ -148,7 +148,7 @@ kpasos k xs f w phih phig= kpasos (k-1) (map (iteracion f w phih phig (aleatorio
     A continuacioón nos encontramos con el bloque que se va a encargar del output, concretamente del archivo que contendrá un
 resumen del resultado de la optimización así como las partículas en la última de las iteraciones.
 
-    particualsString como su nombre indica se encarga de conevrtir a un string una lista de partículas, concretamente
+    particulasString como su nombre indica se encarga de convertir a un string una lista de partículas, concretamente
 haciendo que cada una de ellas quede en una linea.
 
     informe crea el String completo que vamos a poner en el archivo.
@@ -177,9 +177,25 @@ func1 (x,y,z) = abs(x*(y-5) + x*sin(y-7)+3)
 func2 :: (Float,Float,Float) -> Float 
 func2 (x,y,z) = (x**2)*(y**3)+z**6
 
+func3 :: (Float,Float,Float) -> Float 
+func3 (x,y,z) = - ((sin(x+y))**2+(cos(x+z))**2) 
+
+func4 :: (Float,Float,Float) -> Float 
+func4 (x,y,z) = x**2 + y**2 + z**2
+
+func5 :: (Float,Float,Float) -> Float
+func5 (x,y,z) = abs(x+y+z) + abs(x)*abs(y)*abs(z)
+
+func6 :: (Float,Float,Float) -> Float 
+func6 (x,y,z) = x**2 + (x+y)**2 + (x+y+z)**2 
+
 elegirF :: Int -> ((Float,Float,Float) -> Float)
 elegirF 1 = func1
 elegirF 2 = func2
+elegirF 3 = func3 
+elegirF 4 = func4 
+elegirF 5 = func5 
+elegirF 6 = func6
 
 {-
     Por último se encuentra el bloque de entrada/salida que se encargará de pedir por pantalla nombres de ficheros, archivos,
@@ -189,8 +205,12 @@ número de iteraciones... Para acabar ejecutando el algoritmo PSO.
 
 proceso :: IO ()
 proceso = do putStr "Elija la función que quiere optimizar indicando el número correspondiente: \n"
-             putStr "[1] f(x,y,z) = abs(x*(y-5) + x*sin(y-7)+z) \n"
-             putStr "[2] g(x,y,z) = x^2*y^3+z^6 \n"
+             putStr "[1] f(x,y,z) = |x*(y-5) + x*sin(y-7)+z| \n"
+             putStr "[2] f(x,y,z) = x^2*y^3+z^6 \n"
+             putStr "[3] f(x,y,z) = - ((sin(x+y))^2+(cos(x+z))^2) \n"
+             putStr "[4] f(x,y,z) = x^2 + y^2 + z^2 \n"
+             putStr "[5] f(x,y,z) = |x+y+z| + |x*y*z| \n"
+             putStr "[6] f(x,y,z) = x^2 + (x+y)^2 + (x+y+z)^2 \n"
              funchar <- getLine
              putStr "Escriba el nombre del fichero que contiene los parámetros: "
              nombreIn <- getLine
@@ -215,3 +235,4 @@ proceso = do putStr "Elija la función que quiere optimizar indicando el número
                  phig = read phigchar :: Float
                  texto = informe (kpasos steps (ponerG (inicioPar (inicializar n ls us)) func) func w phih phig) func
              writeFile nombreOut texto 
+
