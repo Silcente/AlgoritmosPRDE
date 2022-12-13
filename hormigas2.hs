@@ -42,7 +42,7 @@ delete m (x:xs)
 --ITERACIÓN 1
 
 probabilidadAristaParte1 :: Grafo -> Arista -> Float --la necesito para calcular la probabilidad de una arista
-probabilidadAristaParte1 grafo arista  = inverso (distancia arista) * 0.1 --0.1 son las ferormonas en una arista cuando no la ha recorrido ninguna hormiga inicialmente
+probabilidadAristaParte1 grafo arista  = inverso (distancia arista) * 0.1 --0.1 son las feromonas en una arista cuando no la ha recorrido ninguna hormiga inicialmente
 
 listasProbabilidad :: Grafo -> [Arista] -> [Float] --lista de porbablidadesparte1 de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
 listasProbabilidad grafo = map (probabilidadAristaParte1 grafo)
@@ -96,14 +96,14 @@ caminosConA (x:xs) arista
   |otherwise = caminosConA xs arista
 
 
-ferormonasAristaN :: Grafo -> Arista -> Int -> Int -> Float --ferormonas en la iteración n con m hormigas
-ferormonasAristaN (G xs ys) arista 0 m = 0.1
-ferormonasAristaN (G xs ys) arista n m = 0.99 * ferormonasAristaN (G xs ys) arista (n-1) m + (sum (distanciasPosibles caminos))
+feromonasAristaN :: Grafo -> Arista -> Int -> Int -> Float --feromonas en la iteración n con m hormigas
+feromonasAristaN (G xs ys) arista 0 m = 0.1
+feromonasAristaN (G xs ys) arista n m = 0.99 * feromonasAristaN (G xs ys) arista (n-1) m + (sum (distanciasPosibles caminos))
   where caminos = caminosConA (elegirCaminoNM (G xs ys) (head xs) (last xs) n m) arista
 
 
-probabilidadAristaParte1M :: Grafo -> Arista -> Int -> Int -> Float --la necesito para calcular la probabilidad de una arista, el int es numero de interacciones y de hormigas
-probabilidadAristaParte1M grafo arista n m = inverso (distancia arista) * ferormonasAristaN grafo arista (n-1) m --generalizar
+probabilidadAristaParte1M :: Grafo -> Arista -> Int -> Int  -> Float --la necesito para calcular la probabilidad de una arista, el int es numero de interacciones y de hormigas
+probabilidadAristaParte1M grafo arista n m = inverso (distancia arista) * feromonasAristaN grafo arista (n-1) m --generalizar
 
 listasProbabilidadM :: Grafo -> [Arista] -> Int -> Int -> [Float] --lista de porbablidadesparte1 de los posibles caminos a partir de un nodo, [arista] se coge de aristasnodoa
 listasProbabilidadM _ [] _ _ = []
@@ -117,6 +117,12 @@ probabilidadesM :: Grafo -> [Arista] -> Int -> Int -> [(Float, Arista)] --lista 
 probabilidadesM _ [] _ _ = []
 probabilidadesM grafo (x:xs) n m = (probabilidadAristaM grafo x n m) : probabilidadesM grafo xs n m
 
+{-
+probAristas :: Grafo -> [Arista] -> Int -> Int -> [(Float, Arista)]
+probAristas g xs n m = zip probabilidades xs
+  where probabilidades = map (funcionprobabilidadunaarista g n m) xs 
+-}
+
 
 intervaloProb :: [(Float, Arista)] -> [(Float, Arista)]
 intervaloProb [] = []
@@ -124,9 +130,10 @@ intervaloProb [x] = [(1, snd x)]
 intervaloProb (x:y:ys) = (fst x, snd x) : intervaloProb (((primero+segundo), snd y):ys)
   where primero = fst x
         segundo = fst y
+
   
 elegirArista1M :: Grafo -> [(Float, Arista)] -> Int -> Int -> Float -> Arista --la lista de float es listasprobabilidad grafo de una arista ordenada
-elegirArista1M _ [x] _ _ = snd x
+elegirArista1M _ [x] _ _ _= snd x
 elegirArista1M grafo (x:xs) n m p
   | p < (fst x) =  snd x
   |otherwise = elegirArista1M grafo xs n m p
@@ -136,7 +143,7 @@ elegirCamino1M :: Grafo -> Nodo -> Nodo -> Int -> Int -> Float -> [Arista]
 elegirCamino1M grafo x y n m p
   |x/=y = arista : elegirCamino1M grafo (dos arista) y n m p
   |otherwise = []
-  where arista = elegirArista1M grafo (intervaloProb (probabilidadesM grafo (aristasNodoa grafo m) n m)) n m p
+  where arista = elegirArista1M grafo (intervaloProb (probabilidadesM grafo (aristasNodoa grafo x) n m)) n m p
 
 
 elegirCaminoNM :: Grafo -> Nodo -> Nodo -> Int -> Int -> [[Arista]] -- m es el número de hormigas
