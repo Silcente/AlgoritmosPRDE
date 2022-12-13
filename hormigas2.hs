@@ -1,3 +1,5 @@
+import System.Random 
+
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
 data Grafo = G [Nodo] [Arista] deriving (Show, Read)
@@ -150,14 +152,14 @@ noRepes [] = []
 noRepes (x:xs) = x : noRepes (filter (/= x) xs)
 
 fin :: IO ()
-fin = do putStr "Elige el número de hormigas iniciales"
+fin = do putStr "Elige el número de hormigas iniciales: "
          hormichar <- getLine
-         putStr "Elige el número de iteraciones"
+         putStr "Elige el número de iteraciones: "
          itechar <- getLine
-         putStr "Escribe el nombre del fichero de entrada"
+         putStr "Escribe el nombre del fichero de entrada: "
          nombreIn <- getLine
          contenido <- readFile (nombreIn)
-         putStr "Escribe el nombre del fichero de salida"
+         putStr "Escribe el nombre del fichero de salida: "
          nombreOut <- getLine
          let listanodos = ordena (noRepes (nodos (lines contenido)))
              hormigas = read hormichar :: Int
