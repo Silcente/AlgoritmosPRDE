@@ -145,7 +145,8 @@ kpasos k xs f w phih phig= kpasos (k-1) (map (iteracion f w phih phig (aleatorio
     where aleatorios = numerosAleatorios (2*k) 
 
 {-
-    A continuacioón nos encontramos con el bloque que se va a encargar del output, concretamente del archivo que contendrá un
+
+    A continuación nos encontramos con el bloque que se va a encargar del output, concretamente del archivo que contendrá un
 resumen del resultado de la optimización así como las partículas en la última de las iteraciones.
 
     particulasString como su nombre indica se encarga de convertir a un string una lista de partículas, concretamente
