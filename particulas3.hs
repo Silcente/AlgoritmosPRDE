@@ -14,6 +14,7 @@ de la siguiente manera:
 
 La función mínimo se usará evidentemente para ver en que punto de las posiciones actuales está el mínimo.
     -}
+
 data Particula = P (Float,Float,Float) (Float,Float,Float) (Float,Float,Float) (Float,Float,Float)
     deriving(Show,Read)
 
@@ -205,7 +206,7 @@ número de iteraciones... Para acabar ejecutando el algoritmo PSO.
 -}
 
 main :: IO ()
-main = do putStr "Elija la función que quiere optimizar indicando el número correspondiente: \n"
+particulas = do putStr "Elija la función que quiere optimizar indicando el número correspondiente: \n"
           putStr "[1] f(x,y,z) = |x*(y-5) + x*sin(y-7)+z| \n"
           putStr "[2] f(x,y,z) = x^2*y^3+z^6 \n"
           putStr "[3] f(x,y,z) = - ((sin(x+y))^2+(cos(x+z))^2) \n"
