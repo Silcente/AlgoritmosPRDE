@@ -52,6 +52,12 @@ pertenece x (y:ys)
     | x == y = True
     | otherwise = pertenece x ys
 
+compararEvaluado :: Eq a => [(b,a)] ->a -> b
+compararEvaluado [x] y = fst x 
+compararEvaluado (x:xs) y
+        | ( snd x == y ) = fst x
+        | otherwise = compararEvaluado xs y
+
 {- 
 Este bloque lo utilizaremos para iniciar el algoritmo, que se encarga de establecer las condiciones iniciales.
 
@@ -198,15 +204,46 @@ mover_hormiga (H xs) ys
         where n = foldr1 max (nodos_hormiga (H xs)) --Maximo nodo de la hormiga 
               m = (nodos1 (xs!!0))!!0
               zs = ((elegir_camino m n ys):xs)
-
-
 --
+
+algoritmo :: Grafo -> [Hormiga] ->  Int -> [Hormiga]
+algoritmo _ hs 0 = hs
+algoritmo (G xs ys) hs n = algoritmo g'' caminos (n-1) 
+    where g' = probCaminos (G xs ys) (length xs)
+          caminos = map ((flip mover_hormiga) g') (iniciarHormigas (length hs))
+          g'' = actualizarFeromonas g' hs
+
+distancia :: Hormiga -> Float
+distancia (H xs) = sum (map peso xs)
+
+mejorCamino :: [Hormiga] -> Hormiga
+mejorCamino hs = mejorHormiga
+    where distancias = map distancia hs
+          pares = zip hs distancias
+          mejor = minimo distancias
+          mejorHormiga = compararEvaluado pares mejor
+
+resumen :: Hormiga -> String 
+resumen (H xs) = "El mejor camino es " ++  camino ++ " cuya distancia es " ++ show (distancia (H xs))
+    where camino = unwords (map show (map nodos (reverse xs)) )
+
+minimo :: Ord a => [a] -> a
+minimo [x] = x
+minimo (x:xs) 
+    | x < minResto = x
+    |otherwise = minResto   
+    where minResto = minimo xs
+
 proceso :: IO ()
 proceso = do 
              putStr "Escriba el nombre del fichero que contiene las aristas: "
              ficheroAristas <- getLine
              putStr "Escriba el nombre del fichero que contiene los nodos: "
              ficheroNodos <- getLine
+             putStr "Escriba el número de iteraciones: "
+             nChar <- getLine
+             putStr "Escriba el número de hormigas: "
+             mChar <- getLine
              putStr "Escriba el nombre del fichero de salida: "
              nombreOut <- getLine
              nodoChar <- readFile ficheroNodos
@@ -216,32 +253,10 @@ proceso = do
                  aristas1 = map leerArista lineasA 
                  aristas = map iniciarArista aristas1
                  grafo = G nodos aristas
-                 h1 = H [A (1,3) 34 0.1 0.23,A (3,5) 44 0.1 0.58]
-                 h2 = H [A (1,2) 12 0.1 0.66,A (2,5) 32 0.1 0.63]
-                 h3 = H [A (1,5) 78 0.1 1]
-                 hormigas = [h1,h2,h3]
-                 resultado1 = texto (probCaminosNodo grafo 1)
-                 resultado2 = texto(probCaminos grafo (length nodos))
-                 resultado3 = texto(actualizarFeromonas grafo hormigas)
-             writeFile nombreOut resultado2
-
-proceso1 :: IO ()
-proceso1 = do 
-             putStr "Escriba el nombre del fichero que contiene las aristas: "
-             ficheroAristas <- getLine
-             putStr "Escriba el nombre del fichero que contiene los nodos: "
-             ficheroNodos <- getLine
-             putStr "Escriba el nombre del fichero de salida: "
-             nombreOut <- getLine
-             nodoChar <- readFile ficheroNodos
-             aristaChar <- readFile ficheroAristas
-             let nodos = read nodoChar :: [Nodo]
-                 lineasA = lines aristaChar
-                 aristas1 = map leerArista lineasA 
-                 aristas = map iniciarArista aristas1
-                 grafo = G nodos aristas
-                 iteracion = show (mover_hormiga (H []) (probCaminos grafo (length nodos)))
-             writeFile nombreOut iteracion 
+                 n = read nChar :: Int
+                 m = read mChar :: Int 
+                 resultado = resumen (mejorCamino (algoritmo grafo (iniciarHormigas m) n))
+             writeFile nombreOut resultado
 
 
 
