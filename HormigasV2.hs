@@ -1,7 +1,7 @@
 {-
 En este primer bloque encontramos los tipos de datos que vamos a utilizar en este algoritmo,
     El nodo simplemente va a ser un entero,
-    Una arista va a ser: un par de nodos, un peso y la última cantidad de feromonas registradas.
+    Una arista va a ser: un par de nodos, un peso, la última cantidad de feromonas registradas y probabilidad.
     Un grafo, como su definición formal, será una lista de nodos y una lista de aristas
     Una hormiga va a almacenar las aristas que lleva recorridas en la iteración actual, se vacia en cada nueva iteración.
 -}
@@ -50,6 +50,18 @@ iniciarGrafo :: [Arista] -> Grafo
 iniciarGrafo xs = G nodos xs
     where nodos = noRepes (foldr (++) (map nodos xs))
 
+caminosDesde :: Grafo -> Nodo -> [Arista]
+caminosDesde (G _ []) _ = []
+caminosDesde (G xs (y:ys)) n
+    | (nodos y) !! 0 == n = y: caminosDesde (G xs ys) n
+    | otherwise = caminosDesde (G xs ys) n
+
+probCaminosNodo :: Grafo -> Nodo -> Grafo
+proCaminosNodo (G xs ys) n = G'
+    where posibles = caminosDesde (G xs ys) n
+          denominador = sum (zipWith (*) (map feromonas ys) (map (**(-1)) (map peso ys)))
+          numerador =
+
 actualizarProb :: Grafo -> Grafo
 
 iteracion :: Hormiga -> Grafo -> [Aristas] -- Grafo se va a inicializar con las probabilidades actualizadas
@@ -71,3 +83,9 @@ where G' = actualizarProb G
 2. moverHormigas
 3. feromonas
 -}
+
+
+
+
+
+
