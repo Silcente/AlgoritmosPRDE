@@ -1,4 +1,5 @@
 import System.Random
+import Data.List
 
 type Nodo = Int
 data Arista = A (Nodo, Nodo) Float deriving (Show, Read)
@@ -114,9 +115,9 @@ fin = do putStr "Elige el número de hormigas iniciales: "
              iteraciones = read itechar :: Int
              aristas = aristasFichero (lines contenido)
              grafo = G listanodos aristas
-             caminos = mejorCamino (elegirCaminoNM grafo (head listanodos) (last listanodos) iteraciones hormigas)
-             costo = show (distanciaCamino caminos)
-             texto = "El camino más óptimo recorrido por las hormigas es: " ++ "\n" ++ grafoFichero caminos ++ "\n" ++ costo
+             caminos = elegirCaminoNM grafo (head listanodos) (last listanodos) iteraciones hormigas
+             --costo = show (distanciaCamino caminos)
+             texto = caminosFichero caminos
          writeFile nombreOut texto
          
 aristasFichero :: [String] -> [Arista]
@@ -136,10 +137,11 @@ grafoFichero :: [Arista] -> String
 grafoFichero [] = ""
 grafoFichero (x:xs) = show x ++ "\n" ++ grafoFichero xs 
 
-{-caminosFichero :: [[Arista]] -> String
+caminosFichero :: [[Arista]] -> String
 caminosFichero [] = ""
 caminosFichero (x:xs) = intro ++ "\n" ++ grafoFichero x ++ "\n" ++ caminosFichero xs
-  where intro = "El camino más óptimo recorrido por las hormigas es: "-}
-
+  where intro = "El camino más óptimo recorrido por las hormigas es: "
+{-
 mejorCamino :: [[Arista]] -> [Arista]
 mejorCamino xs = maximun (map distanciasPosibles xs)
+-}
