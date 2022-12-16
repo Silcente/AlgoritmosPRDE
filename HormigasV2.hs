@@ -8,7 +8,7 @@ En este primer bloque encontramos los tipos de datos que vamos a utilizar en est
 
 type Nodo = Int
 
-data Arista = A (Nodo,Nodo) Float Float
+data Arista = A (Nodo,Nodo) Float Float Float
 
 data Grafo = G [Nodo] [Arista]
 
@@ -50,6 +50,24 @@ iniciarGrafo :: [Arista] -> Grafo
 iniciarGrafo xs = G nodos xs
     where nodos = noRepes (foldr (++) (map nodos xs))
 
+actualizarProb :: Grafo -> Grafo
 
+iteracion :: Hormiga -> Grafo -> [Aristas] -- Grafo se va a inicializar con las probabilidades actualizadas
 
+actualizarArista :: [Hormigas] -> Arista -> Arista
 
+mapArista 
+
+actualizarFero
+
+algoritmo :: Cosas 
+kpasos n = algoritmo G'' (iniciar n hormigas) 
+where G' = actualizarProb G
+      caminosRecorridos = map iteracion G' [hormigas]
+      G'' actualizarFeromonas
+
+{-
+1. Probabilidades
+2. moverHormigas
+3. feromonas
+-}
