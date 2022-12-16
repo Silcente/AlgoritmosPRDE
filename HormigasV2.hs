@@ -1,3 +1,4 @@
+import System.Random
 {-
 En este primer bloque encontramos los tipos de datos que vamos a utilizar en este algoritmo,
     El nodo simplemente va a ser un entero,
@@ -44,6 +45,12 @@ probabilidad (A _ _ _  p) = p
 
 inverso :: Float -> Float
 inverso x = 1/x
+
+pertenece ::Eq a => a -> [a] -> Bool
+pertenece _ [] = False
+pertenece x (y:ys)
+    | x == y = True
+    | otherwise = pertenece x ys
 
 {- 
 Este bloque lo utilizaremos para iniciar el algoritmo, que se encarga de establecer las condiciones iniciales.
@@ -108,6 +115,92 @@ texto (G xs (y:ys)) = show y ++ "\n" ++texto (G xs ys)
 leerArista :: String -> ((Nodo,Nodo), Float)
 leerArista x = read x :: ((Nodo,Nodo), Float)
 
+leerHormiga :: String -> Hormiga
+leerHormiga x = read x :: Hormiga
+
+feroHormigaArista :: Arista -> Hormiga -> Float
+feroHormigaArista x (H zs)
+    | pertenece x zs = inverso ( sum (map peso zs) )
+    | otherwise = 0
+
+feroArista ::  [Hormiga] -> Arista -> Float
+feroArista ys x = sum (map (feroHormigaArista x) ys)
+
+totalFeromonas :: Grafo -> [Hormiga] -> [(Arista,Float)]
+totalFeromonas (G xs ys) hs = pares
+    where fero =zipWith (+) (map (0.9*) (map feromonas ys)) (map (feroArista hs) ys)
+          pares = zip ys fero  
+
+cambiarFero1 :: [Arista] -> (Arista, Float) -> [Arista]
+cambiarFero1 [] _ = []
+cambiarFero1 ((A (x,y) dis fero prob):ys) (a,f)
+    | (A (x,y) dis fero prob) == a = (A (x,y) dis f prob) : ys
+    | otherwise = (A (x,y) dis fero prob): cambiarFero1 ys (a,f)
+
+cambiarFero :: [Arista] -> [(Arista,Float)] -> [Arista]
+cambiarFero xs [] = xs
+cambiarFero xs (y:ys) = cambiarFero (cambiarFero1 xs y) ys 
+
+actualizarFeromonas :: Grafo -> [Hormiga] -> Grafo
+actualizarFeromonas (G xs ys) hs = G xs actualizadas
+    where actualizadas = cambiarFero ys (totalFeromonas (G xs ys) hs)
+--ÁLVARO
+num_aleatorioj :: Int -> Int ->  Int   
+num_aleatorioj q p=((randomRs (0,1) gen)!!p)  
+    where gen = mkStdGen q
+--Para determinar el nodo final del Grafo (donde se finalizaran los caminos)
+maximo_nodo :: Grafo -> Nodo
+maximo_nodo (G xs ys) = foldr1 (max) xs
+
+nodos_hormiga ::  Hormiga -> [Nodo]
+nodos_hormiga (H xs) = noRepes (foldr (++) [] (map nodos1 xs))
+
+nodos1 :: Arista -> [Nodo]
+nodos1 (A (x,y) _ _ _) = [x,y]
+
+esta :: Float -> (Float,Float) -> Bool 
+esta p xs 
+    |x<=p && p<y = True
+    |p==x && p==y = True 
+    |otherwise = False
+        where x = (fst xs)
+              y = (snd xs)
+
+anadir_intervalo :: [Arista] -> Float -> [(Arista, (Float, Float))] --Se inicializara con Anterior = 0, esta funcion asocia a cada posicion con su intervalo, sin considerar si ha habido un reajuste en cuyo caso las notas estaran aumentadas  
+anadir_intervalo [(A (x,y) d f p)] n = [((A (x,y) d f p),(n,(n+p)))]
+anadir_intervalo ((A (x,y) d f p):xs) n = [((A (x,y) d f p),(n, (n+p)))]++(anadir_intervalo xs (n+p))
+
+probabilidad2 :: [(Arista, (Float, Float))] -> Arista -- Se inicializara con anadir_intervalo (caminosDesde xs 1) 
+probabilidad2 [(x, (y,z))] = x   --Si solo queda una posicion esta sera la seleccionada
+probabilidad2 (((A (x,y) d f p),(s,t)):xs)
+    |esta (fromIntegral num) (s,t) = (A (x,y) d f p)  --Si el valor aleatorio esta en el intervalo asociado esa es la posicion elegida  
+    |otherwise = probabilidad2 xs  --En caso contrario seguimos buscando
+        where num = num_aleatorioj 2022 (round d ) --Cogemos un numero aleatorio entre 0 y la suma total de todos los valores
+
+quitar_acabados_anterior :: Anterior -> [Arista] -> [Arista] --Esta funcion la aplicaremos en elegir camino para que no pueda volver al nodo anteorior 
+quitar_acabados_anterior n [] = []
+quitar_acabados_anterior n xs = filter (distinto n) xs
+distinto :: Anterior -> Arista -> Bool
+distinto n (A (x,y) p d f)
+    |n==y = False
+    |otherwise = True 
+ --Hay que añadir Eq
+type Anterior = Nodo --Totalmente prescindible pero para que se entienda 
+--REVISAR LA ELECCION DEL NUMERO ALEATORIO 
+elegir_camino :: Anterior -> Nodo -> Grafo -> Arista --Dado un nodo determina mediante la seleccion probabilistica que arista sera la siguiente en seleccionar 
+elegir_camino m x xs = probabilidad2 (anadir_intervalo (quitar_acabados_anterior m (caminosDesde xs x)) 0)
+
+mover_hormiga :: Hormiga -> Grafo -> Hormiga 
+mover_hormiga (H []) ys = mover_hormiga (H [elegir_camino 1 1 ys]) ys
+mover_hormiga (H xs) ys 
+    |n == (maximo_nodo ys) = (H xs) --Si el maximo nodo de la hormiga coincide con el maximo nodo del grafo significa que el camino de la hormiga ya ha terminado            
+    |otherwise = mover_hormiga (H zs) ys
+        where n = foldr1 max (nodos_hormiga (H xs)) --Maximo nodo de la hormiga 
+              m = (nodos1 (xs!!0))!!0
+              zs = ((elegir_camino m n ys):xs)
+
+
+--
 proceso :: IO ()
 proceso = do 
              putStr "Escriba el nombre del fichero que contiene las aristas: "
@@ -119,13 +212,39 @@ proceso = do
              nodoChar <- readFile ficheroNodos
              aristaChar <- readFile ficheroAristas
              let nodos = read nodoChar :: [Nodo]
-                 lineas = lines aristaChar
-                 aristas1 = map leerArista lineas 
+                 lineasA = lines aristaChar
+                 aristas1 = map leerArista lineasA 
                  aristas = map iniciarArista aristas1
                  grafo = G nodos aristas
-                 resultado = texto(probCaminos grafo (length nodos))
-             writeFile nombreOut resultado
-                 
+                 h1 = H [A (1,3) 34 0.1 0.23,A (3,5) 44 0.1 0.58]
+                 h2 = H [A (1,2) 12 0.1 0.66,A (2,5) 32 0.1 0.63]
+                 h3 = H [A (1,5) 78 0.1 1]
+                 hormigas = [h1,h2,h3]
+                 resultado1 = texto (probCaminosNodo grafo 1)
+                 resultado2 = texto(probCaminos grafo (length nodos))
+                 resultado3 = texto(actualizarFeromonas grafo hormigas)
+             writeFile nombreOut resultado2
+
+proceso1 :: IO ()
+proceso1 = do 
+             putStr "Escriba el nombre del fichero que contiene las aristas: "
+             ficheroAristas <- getLine
+             putStr "Escriba el nombre del fichero que contiene los nodos: "
+             ficheroNodos <- getLine
+             putStr "Escriba el nombre del fichero de salida: "
+             nombreOut <- getLine
+             nodoChar <- readFile ficheroNodos
+             aristaChar <- readFile ficheroAristas
+             let nodos = read nodoChar :: [Nodo]
+                 lineasA = lines aristaChar
+                 aristas1 = map leerArista lineasA 
+                 aristas = map iniciarArista aristas1
+                 grafo = G nodos aristas
+                 iteracion = show (mover_hormiga (H []) (probCaminos grafo (length nodos)))
+             writeFile nombreOut iteracion 
+
+
+
 
 {-
 
