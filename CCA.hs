@@ -73,8 +73,18 @@ iteracion f q xs ys zs s (P ((e,d), n, i))
 posicion_vecina :: (Float,Float) -> Semilla -> Enjambre -> Ejex -> Ejey -> (Float,Float) --Necesito la propia posicion actual, el enjambre para seleccionar X_jk, el inicio y el fin para no salirme de la region de estudio
 posicion_vecina (x,y) q ys zs ks = (en_el_borde (suma_tuplas (x,y) (pork (aleatorioi_j q (abs (round x)) (-1) 1) (c,d))) zs ks)  
         where num = (num_aleatorioj q 0 ((length ys)-1))
-              c = (x - fst (fst3 (ys!!num)))
-              d = (y - snd (fst3 (ys!!num)))
+              (c,d)=distinto (x,y) q ys a b --Con la funcion distinto nos aseguramos escoger una posicion distinta de la actual para la aplicacion de la formula
+              a = (x - fst (fst3 (ys!!num)))
+              b = (y - snd (fst3 (ys!!num)))
+              
+distinto :: (Float,Float) -> Semilla -> Enjambre -> Float -> Float -> (Float,Float) 
+distinto (x,y) q ys c d 
+    |c==0 && d==0 = (distinto (x,y) (q+1) ys e f)
+    |otherwise = (c,d) 
+        where num = (num_aleatorioj q 0 ((length ys)-1))
+              e = (x - fst (fst3 (ys!!num)))
+              f = (y - snd (fst3 (ys!!num)))
+          
 --en_el_borde dada una posicion, determina si una posicion esta en los limites de la region de estudio y en caso de salirse, devuelve la posicion del borde mas proxima 
 en_el_borde :: (Float,Float) -> Ejex -> Ejey -> (Float,Float)
 en_el_borde (a,b) xs ys 
