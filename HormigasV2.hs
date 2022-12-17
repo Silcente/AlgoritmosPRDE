@@ -317,9 +317,7 @@ proceso = do
                  n = read nChar :: Int
                  m = read mChar :: Int 
                  resultado = resumen (mejorCamino (algoritmo grafo (iniciarHormigas m) n))
-                 resultado2 = textoHormigas( algoritmo grafo (iniciarHormigas 10) 1)
-                 resultado3 = resumen (mover_hormiga (H 1 []) grafo)
-             writeFile nombreOut resultado2
+             writeFile nombreOut resultado
 
 
 
